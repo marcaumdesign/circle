@@ -16,7 +16,7 @@ const LOGOS = [
 export default function LogosStrip() {
   return (
     <section className="flex flex-col items-center gap-[32px] px-[32px] py-[64px]">
-      <p className="text-center text-[16px] font-medium leading-[24px] tracking-[-0.25px] text-black opacity-60">
+      <p className="text-label-md text-center text-black opacity-60">
         Trusted by the world&rsquo;s top communities
       </p>
       <motion.div

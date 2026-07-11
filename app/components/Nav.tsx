@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+
+const NAV_HEIGHT = 72;
 
 const DROPDOWNS: Record<string, { label: string; description: string }[]> = {
   Product: [
@@ -43,17 +45,21 @@ function Chevron({ open }: { open: boolean }) {
 function NavLink({
   label,
   dropdown,
+  onWhite,
 }: {
   label: string;
   dropdown?: { label: string; description: string }[];
+  onWhite: boolean;
 }) {
   const [open, setOpen] = useState(false);
+
+  const linkColor = onWhite ? "text-[#171717]" : "text-[#fafafa]";
 
   if (!dropdown) {
     return (
       <a
         href="#"
-        className="text-[16px] font-medium leading-[20px] tracking-[-0.25px] text-[#fafafa] transition-opacity duration-200 hover:opacity-70"
+        className={`text-label-md transition-[color,opacity] duration-200 hover:opacity-70 ${linkColor}`}
       >
         {label}
       </a>
@@ -67,7 +73,7 @@ function NavLink({
       onMouseLeave={() => setOpen(false)}
     >
       <button
-        className="flex items-center gap-[4px] text-[16px] font-medium leading-[20px] tracking-[-0.25px] text-[#fafafa] transition-opacity duration-200 hover:opacity-70"
+        className={`text-label-md flex items-center gap-[4px] hover:opacity-70 ${linkColor}`}
         aria-expanded={open}
       >
         {label}
@@ -82,17 +88,33 @@ function NavLink({
             transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
             className="absolute left-1/2 top-full z-50 w-[280px] -translate-x-1/2 pt-[12px]"
           >
-            <div className="rounded-[16px] border border-white/10 bg-[#0d1030]/95 p-[8px] shadow-[0_16px_32px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+            <div
+              className={`rounded-[16px] border p-[8px] ${
+                onWhite
+                  ? "border-stroke-soft-200 bg-white shadow-[0_16px_32px_-12px_rgba(14,18,27,0.12)]"
+                  : "border-white/10 bg-[#0d1030]/95 shadow-[0_16px_32px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+              }`}
+            >
               {dropdown.map((item) => (
                 <a
                   key={item.label}
                   href="#"
-                  className="block rounded-[10px] px-[12px] py-[10px] transition-colors duration-150 hover:bg-white/10"
+                  className={`block rounded-[10px] px-[12px] py-[10px] transition-colors duration-150 ${
+                    onWhite ? "hover:bg-[#f5f5f5]" : "hover:bg-white/10"
+                  }`}
                 >
-                  <span className="block text-[15px] font-medium leading-[20px] tracking-[-0.2px] text-[#fafafa]">
+                  <span
+                    className={`text-label-md block ${
+                      onWhite ? "text-[#171717]" : "text-[#fafafa]"
+                    }`}
+                  >
                     {item.label}
                   </span>
-                  <span className="block text-[13px] leading-[18px] text-white/50">
+                  <span
+                    className={`text-paragraph-xs block ${
+                      onWhite ? "text-[#7b7b7b]" : "text-white/50"
+                    }`}
+                  >
                     {item.description}
                   </span>
                 </a>
@@ -106,37 +128,95 @@ function NavLink({
 }
 
 export default function Nav() {
+  const [onWhite, setOnWhite] = useState(false);
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    const ratings = document.getElementById("hero-ratings");
+    let lastY = window.scrollY;
+    let ticking = false;
+
+    const update = () => {
+      const y = window.scrollY;
+
+      if (ratings) {
+        setOnWhite(ratings.getBoundingClientRect().top <= NAV_HEIGHT);
+      }
+
+      const delta = y - lastY;
+      if (y <= NAV_HEIGHT) {
+        setHidden(false);
+      } else if (delta > 4) {
+        setHidden(true);
+      } else if (delta < -4) {
+        setHidden(false);
+      }
+      lastY = y;
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  const linkColor = onWhite ? "text-[#171717]" : "text-[#fafafa]";
+
   return (
-    <nav className="relative z-40 w-full px-[119px] py-[12px]">
-      <div className="flex h-[48px] w-full items-center justify-between">
+    <motion.nav
+      animate={{ y: hidden ? "-100%" : "0%" }}
+      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+      className={`fixed inset-x-0 top-0 z-[9999] border-b py-[12px] transition-[background-color,border-color] duration-300 ${
+        onWhite
+          ? "border-stroke-soft-200 bg-white"
+          : "border-transparent bg-transparent"
+      }`}
+    >
+      <div className="mx-auto flex h-[48px] w-full max-w-[1200px] items-center justify-between px-[30px]">
         <div className="flex items-center gap-[48px]">
           <a href="#" aria-label="Circle home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/hero/logo.svg" alt="Circle" className="h-[29px] w-[100px]" />
+            <img
+              src="/hero/logo.svg"
+              alt="Circle"
+              className={`h-[29px] w-[100px] transition-[filter] duration-300 ${
+                onWhite ? "invert" : ""
+              }`}
+            />
           </a>
           <div className="flex items-center gap-[24px]">
-            <NavLink label="Product" dropdown={DROPDOWNS.Product} />
-            <NavLink label="Branded App" />
-            <NavLink label="Resources" dropdown={DROPDOWNS.Resources} />
-            <NavLink label="Discover" />
-            <NavLink label="Pricing" />
+            <NavLink label="Product" dropdown={DROPDOWNS.Product} onWhite={onWhite} />
+            <NavLink label="Branded App" onWhite={onWhite} />
+            <NavLink label="Resources" dropdown={DROPDOWNS.Resources} onWhite={onWhite} />
+            <NavLink label="Discover" onWhite={onWhite} />
+            <NavLink label="Pricing" onWhite={onWhite} />
           </div>
         </div>
         <div className="flex items-center gap-[24px]">
           <a
             href="#"
-            className="text-[16px] font-medium leading-[20px] tracking-[-0.25px] text-[#fafafa] transition-opacity duration-200 hover:opacity-70"
+            className={`text-label-md transition-[color,opacity] duration-200 hover:opacity-70 ${linkColor}`}
           >
             Log in
           </a>
           <a
             href="#"
-            className="mn-pressable flex items-center justify-center rounded-full border border-[#f5f5f5] px-[24px] py-[14px] text-[16px] font-semibold leading-[20px] tracking-[-0.25px] text-[#fafafa] transition-colors duration-200 hover:bg-white hover:text-[#0d1030]"
+            className="text-label-md mn-btn-primary mn-pressable flex items-center justify-center rounded-full px-[24px] py-[14px] font-semibold text-white"
           >
             Start free trial
           </a>
         </div>
       </div>
-    </nav>
+    </motion.nav>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 const EASE = [0.23, 1, 0.32, 1] as const;
@@ -139,20 +138,34 @@ const CREATORS: Creator[] = [
   },
 ];
 
+function CreatorCard({ creator }: { creator: Creator }) {
+  return (
+    <div className="shrink-0 p-[8px]">
+      <div className="group relative h-[374px] w-[246px] overflow-hidden rounded-[16px] bg-[#e4e7eb]">
+        <div className="pointer-events-none absolute inset-0 origin-center select-none transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.08]">
+          {creator.img}
+        </div>
+        {!creator.baked && (
+          <>
+            <div className="absolute inset-x-0 bottom-0 top-[221px] bg-gradient-to-b from-[rgba(51,51,51,0)] to-[rgba(51,51,51,0.33)] backdrop-blur-[32px] [mask-image:linear-gradient(to_bottom,transparent,black_40%)]" />
+            <div className="absolute bottom-[24px] left-1/2 flex w-[198px] -translate-x-1/2 flex-col items-center gap-[4px]">
+              <p className="font-display text-title-h4 w-[204px] text-center font-bold text-white">
+                {creator.first}
+                <br />
+                {creator.last}
+              </p>
+              <p className="text-label-sm text-[#e4e7eb]">
+                {creator.type}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Creators() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [dragWidth, setDragWidth] = useState(0);
-
-  useEffect(() => {
-    const measure = () => {
-      const el = trackRef.current;
-      if (el) setDragWidth(Math.max(0, el.scrollWidth - el.offsetWidth));
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
   return (
     <section className="relative flex w-full flex-col items-center gap-[64px] overflow-hidden py-[64px]">
       {/* Blurred banner glow behind the cards */}
@@ -174,57 +187,32 @@ export default function Creators() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/creators/star.svg" alt="" className="size-[24px] rotate-90" />
-        <h2 className="font-display w-full text-center text-[48px] font-medium leading-[52px] tracking-[-0.5px] text-black">
+        <h2 className="font-display text-title-h2 w-full text-center text-black">
           Built for pros. Chosen by the best.
         </h2>
-        <p className="w-full text-center text-[18px] font-medium leading-[24px] tracking-[-0.25px] text-[#777]">
+        <p className="text-label-lg w-full text-center text-[#777]">
           Get featured next to top creators like Ali Abdaal, Jay Shetty, and
           Brendon Burchard.
         </p>
       </motion.div>
 
-      <div className="relative w-full cursor-grab active:cursor-grabbing">
-        <motion.div
-          ref={trackRef}
-          drag="x"
-          dragConstraints={{ left: -dragWidth / 2, right: dragWidth / 2 }}
-          dragElastic={0.08}
-          initial={{ opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: EASE }}
-          className="flex items-center justify-center"
-        >
-          {CREATORS.map((c) => (
-            <div key={`${c.first}-${c.last}`} className="shrink-0 p-[8px]">
-              <motion.div
-                whileHover={{ y: -6, scale: 1.015 }}
-                transition={{ duration: 0.3, ease: EASE }}
-                className="relative h-[374px] w-[246px] overflow-hidden rounded-[16px] bg-[#e4e7eb]"
-              >
-                <div className="pointer-events-none absolute inset-0 select-none">
-                  {c.img}
-                </div>
-                {!c.baked && (
-                  <>
-                    <div className="absolute inset-x-0 bottom-0 top-[221px] bg-gradient-to-b from-[rgba(51,51,51,0)] to-[rgba(51,51,51,0.33)] backdrop-blur-[32px] [mask-image:linear-gradient(to_bottom,transparent,black_40%)]" />
-                    <div className="absolute bottom-[24px] left-1/2 flex w-[198px] -translate-x-1/2 flex-col items-center gap-[4px]">
-                      <p className="w-[204px] text-center text-[32px] font-bold leading-none tracking-[-1px] text-white">
-                        {c.first}
-                        <br />
-                        {c.last}
-                      </p>
-                      <p className="text-[14px] font-medium leading-[20px] text-[#e4e7eb]">
-                        {c.type}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.8, ease: EASE }}
+        className="creators-ticker-mask relative w-full"
+      >
+        <div className="creators-ticker flex w-max">
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
+              {CREATORS.map((c) => (
+                <CreatorCard key={`${copy}-${c.first}-${c.last}`} creator={c} />
+              ))}
             </div>
           ))}
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </section>
   );
 }

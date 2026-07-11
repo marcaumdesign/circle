@@ -1,14 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import Nav from "./Nav";
 
 const EASE = [0.23, 1, 0.32, 1] as const;
 
 function RatingsPill() {
   return (
-    <div className="flex items-center gap-[12px] rounded-full border border-[#484b73] bg-white/10 py-[6px] pl-[6px] pr-[12px] backdrop-blur-[6px]">
+    <div
+      id="hero-ratings"
+      className="flex items-center gap-[12px] rounded-full border border-[#484b73] bg-white/10 py-[6px] pl-[6px] pr-[12px] backdrop-blur-[6px]"
+    >
       <div className="flex items-center">
         {[
           { src: "/hero/g2.svg", alt: "G2", pad: false },
@@ -42,11 +44,20 @@ function RatingsPill() {
       <div className="flex items-center gap-[2px]">
         {[0, 1, 2, 3].map((i) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={i} src="/hero/star1.svg" alt="" className="size-[16px]" />
+          <img
+            key={i}
+            src="/hero/star1.svg"
+            alt=""
+            className="size-[16px] shrink-0"
+          />
         ))}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/hero/star5.svg" alt="" className="size-[18px]" />
-        <span className="pl-[6px] text-[16px] font-medium leading-[24px] tracking-[-0.25px] text-[#fafafa]">
+        <img
+          src="/hero/star5.svg"
+          alt=""
+          className="size-[16px] shrink-0"
+        />
+        <span className="text-label-md pl-[6px] text-[#fafafa]">
           70k+ reviews
         </span>
       </div>
@@ -75,21 +86,172 @@ export function EmailField({ dark = false }: { dark?: boolean }) {
           setSubmitted(false);
         }}
         placeholder="Enter your email address"
-        className="min-w-0 flex-1 bg-transparent text-[16px] font-medium leading-[20px] tracking-[-0.25px] text-[#171717] outline-none placeholder:text-[#737373]"
+        className="text-label-md min-w-0 flex-1 bg-transparent text-[#171717] outline-none placeholder:text-[#737373]"
         aria-label="Email address"
       />
       <button
         type="submit"
-        className="mn-pressable flex h-full shrink-0 items-center justify-center rounded-full px-[32px] py-[12px] text-[16px] font-semibold leading-[20px] tracking-[-0.25px] text-[#fafafa] transition-[filter] duration-200 hover:brightness-110"
-        style={{
-          backgroundImage: submitted
-            ? "linear-gradient(163.76deg, #1daf61 18.675%, #178c4e 78.249%)"
-            : "linear-gradient(163.76deg, #408fed 18.675%, #3e1bc9 78.249%)",
-        }}
+        className={`text-label-md mn-pressable flex h-full shrink-0 items-center justify-center rounded-full px-[32px] py-[12px] font-semibold text-[#fafafa] ${
+          submitted ? "" : "mn-btn-primary"
+        }`}
+        style={
+          submitted
+            ? {
+                backgroundImage:
+                  "linear-gradient(163.76deg, #1daf61 18.675%, #178c4e 78.249%)",
+              }
+            : undefined
+        }
       >
         {submitted ? "You're on the list ✓" : "Get started for free"}
       </button>
     </form>
+  );
+}
+
+/** Glass frame from Figma — white fill @ 18% + blur */
+function GlassFrame({
+  className,
+  radius = 31,
+  imageRadius = 24,
+  children,
+}: {
+  className?: string;
+  radius?: number;
+  imageRadius?: number;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={`absolute box-border flex flex-col border border-[rgba(219,219,219,0.14)] bg-[rgba(255,255,255,0.18)] p-[7px] backdrop-blur-[10px] ${className ?? ""}`}
+      style={{ borderRadius: radius }}
+    >
+      <div
+        className="relative min-h-0 min-w-0 flex-1 overflow-hidden"
+        style={{ borderRadius: imageRadius }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const PANEL_EASE = EASE;
+const PANEL_DURATION = 1.25; // was ~0.9, +0.35s
+const MIDDLE_DELAY = 0.4;
+const SIDES_DELAY = MIDDLE_DELAY + 0.2; // short beat after middle starts
+// Hero bg hits 100% opacity 0.1s after collage images start appearing
+const BG_FADE_DELAY = MIDDLE_DELAY;
+const BG_FADE_DURATION = 0.1;
+
+// Figma artboard — pin the phone's center to the hero midline
+const ARTBOARD_W = 2012;
+const MOBILE_LEFT = 706;
+const MOBILE_W = 300;
+const MOBILE_CENTER = MOBILE_LEFT + MOBILE_W / 2; // 856
+
+function HeroCollage() {
+  const sideTransition = {
+    duration: PANEL_DURATION,
+    delay: SIDES_DELAY,
+    ease: PANEL_EASE,
+  } as const;
+
+  return (
+    <div
+      className="relative h-[633px] w-full overflow-hidden"
+      aria-label="Circle product collage"
+    >
+      {/* Artboard anchored so phone center === hero center (asymmetric sides OK) */}
+      <div
+        className="absolute top-0 h-[633px]"
+        style={{
+          left: "50%",
+          width: ARTBOARD_W,
+          transform: `translateX(-${MOBILE_CENTER}px)`,
+        }}
+      >
+        {/* Sides — animate together after middle */}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={sideTransition}
+          className="absolute inset-0"
+        >
+          {/* Video — top left */}
+          <GlassFrame className="left-[5px] top-0 h-[308px] w-[685px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero/collage/video.png"
+              alt="Live session"
+              loading="lazy"
+              className="absolute inset-0 size-full object-cover"
+            />
+          </GlassFrame>
+
+          {/* Chart — bottom left */}
+          <GlassFrame className="left-0 top-[325px] h-[308px] w-[382px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero/collage/chart.png"
+              alt="Active members analytics"
+              loading="lazy"
+              className="absolute inset-0 size-full object-cover"
+            />
+          </GlassFrame>
+
+          {/* Clarity coaching — bottom center-left */}
+          <GlassFrame className="left-[398px] top-[325px] h-[308px] w-[292px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero/collage/clarity.png"
+              alt="1:1 Executive Coaching"
+              loading="lazy"
+              className="absolute inset-0 size-full object-cover"
+            />
+          </GlassFrame>
+
+          {/* Desktop Feature UI — right */}
+          <GlassFrame
+            className="left-[1022px] top-[3px] h-[630px] w-[991px]"
+            radius={16}
+            imageRadius={10}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero/collage/desktop.png"
+              alt="Circle AI workspace"
+              loading="lazy"
+              className="absolute inset-0 size-full object-cover object-top-left"
+            />
+          </GlassFrame>
+        </motion.div>
+
+        {/* Middle — loads & animates first, always on hero center */}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: PANEL_DURATION,
+            delay: MIDDLE_DELAY,
+            ease: PANEL_EASE,
+          }}
+          className="absolute top-0 z-10 h-[633px]"
+          style={{ left: MOBILE_LEFT, width: MOBILE_W }}
+        >
+          <GlassFrame className="inset-0 h-full w-full">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero/collage/mobile.png"
+              alt="Discover+ mobile course"
+              fetchPriority="high"
+              loading="eager"
+              className="absolute inset-0 size-full bg-white object-cover object-top"
+            />
+          </GlassFrame>
+        </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -105,40 +267,51 @@ export default function Hero() {
   return (
     <section
       ref={ref}
-      className="relative h-[1151px] w-full overflow-hidden bg-white"
+      id="hero"
+      className="relative flex w-full flex-col items-stretch overflow-hidden bg-[#020c18]"
     >
-      {/* Rounded gradient background */}
-      <div className="absolute inset-x-1/2 top-0 h-[1129px] w-[1479px] -translate-x-1/2 overflow-hidden rounded-b-[24px] bg-[#020c18]">
-        <motion.div style={{ y: bgY }} className="absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/hero/bg.jpg"
-            alt=""
-            className="absolute left-0 top-0 h-full w-full object-cover"
-          />
-        </motion.div>
-      </div>
+      {/* Edge-to-edge hero photo — fades 0→100%, opaque 0.1s after collage starts */}
+      <motion.div
+        style={{ y: bgY }}
+        className="pointer-events-none absolute inset-0 z-0"
+        initial={{ opacity: 0.5 }}
+        animate={{ opacity: 1 }}
+        transition={{
+          duration: BG_FADE_DURATION,
+          delay: BG_FADE_DELAY,
+          ease: EASE,
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/hero/bg.jpg"
+          alt=""
+          className="absolute inset-0 size-full object-cover object-center"
+        />
+      </motion.div>
 
-      <div className="relative z-10 mx-auto w-[1440px]">
-        <Nav />
-
-        <div className="mt-[88px] flex flex-col items-center gap-[64px]">
+      {/* Main content locked to 1200 */}
+      <div className="relative z-10 mx-auto flex w-full max-w-[1200px] flex-col items-center px-[30px]">
+        <div className="mt-[160px] flex w-full flex-col items-center gap-[64px]">
           <motion.div
             initial="hidden"
             animate="visible"
             variants={{
               hidden: {},
-              visible: { transition: { staggerChildren: 0.09 } },
+              visible: { transition: { staggerChildren: 0.14 } },
             }}
-            className="flex w-[800px] flex-col items-center gap-[32px]"
+            className="flex w-full max-w-[800px] flex-col items-center gap-[32px]"
           >
             {[
               <RatingsPill key="ratings" />,
-              <div key="text" className="flex w-full flex-col items-center gap-[20px] text-center">
-                <h1 className="font-display w-full text-[64px] font-medium leading-[64px] tracking-[-1.5px] text-[#fafafa]">
+              <div
+                key="text"
+                className="flex w-full flex-col items-center gap-[20px] text-center"
+              >
+                <h1 className="font-display text-title-h1 w-full text-[#fafafa]">
                   The only durable business is a community.
                 </h1>
-                <p className="w-full text-[18px] font-medium leading-[24px] tracking-[-0.25px] text-[#fafafa]">
+                <p className="text-label-lg w-full text-[#fafafa]">
                   Courses, events, payments, all yours. Circle AI builds it — your
                   brand owns it.
                 </p>
@@ -148,11 +321,16 @@ export default function Hero() {
               <motion.div
                 key={i}
                 variants={{
-                  hidden: { opacity: 0, y: 16 },
+                  hidden: {
+                    opacity: 0,
+                    y: 16,
+                    ...(i === 1 ? { filter: "blur(8px)" } : {}),
+                  },
                   visible: {
                     opacity: 1,
                     y: 0,
-                    transition: { duration: 0.7, ease: EASE },
+                    ...(i === 1 ? { filter: "blur(0px)" } : {}),
+                    transition: { duration: 1.05, ease: EASE },
                   },
                 }}
               >
@@ -160,23 +338,16 @@ export default function Hero() {
               </motion.div>
             ))}
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.35, ease: EASE }}
-            style={{ y: collageY }}
-            className="h-[597px] w-[1440px]"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/hero/collage.png"
-              alt="Circle product interface collage"
-              className="h-full w-full object-cover"
-            />
-          </motion.div>
         </div>
       </div>
+
+      {/* Collage — middle first, then sides together */}
+      <motion.div
+        style={{ y: collageY }}
+        className="relative z-[1] mx-auto mt-[64px] mb-[48px] w-full overflow-hidden"
+      >
+        <HeroCollage />
+      </motion.div>
     </section>
   );
 }
