@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Star 5">
+<path id="Star 5_2" d="M9 0L11.0206 6.21884L17.5595 6.21885L12.2694 10.0623L14.2901 16.2811L9 12.4377L3.70993 16.2811L5.73056 10.0623L0.440491 6.21885L6.97937 6.21884L9 0Z" fill="var(--fill-0, #D2D7DB)"/>
+<g id="Star Icon" clip-path="url(#clip0_0_272)">
+<path id="Star 6" d="M9 0L11.0206 6.21884L17.5595 6.21885L12.2694 10.0623L14.2901 16.2811L9 12.4377L3.70993 16.2811L5.73056 10.0623L0.440491 6.21885L6.97937 6.21884L9 0Z" fill="var(--fill-0, #FFBB33)"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_272">
+<rect width="14" height="18" fill="white" transform="translate(0.494141)"/>
+</clipPath>
+</defs>
+</svg>
